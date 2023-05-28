@@ -6,39 +6,40 @@ import itertools
 from coordinates_distortion import distorded_cordinates
 import random
 
+def draw_rectangle_with_grid(image, rectangle_coordinates, grid_size, color=(0, 0, 0), thickness=1):
+    # Draw the rectangle
+    cv2.fillPoly(image, [np.array(rectangle_coordinates).astype(int)], (255, 255, 255))
+
+    # Draw horizontal lines
+    for i in range(rectangle_coordinates[0][1], rectangle_coordinates[1][1], grid_size):
+        cv2.line(image, (rectangle_coordinates[0][0], i), (rectangle_coordinates[2][0], i), color, thickness)
+
+    # Draw vertical lines
+    for j in range(rectangle_coordinates[0][0], rectangle_coordinates[2][0], grid_size):
+        cv2.line(image, (j, rectangle_coordinates[0][1]), (j, rectangle_coordinates[1][1]), color, thickness)
+
+
+    return image
 
 
 # Define the dimensions of the rectangle
 width = 440
-height = 320
+height = 360
 
 rectangle_coordinates = [[120,120], [120, 240], [320, 120], [320, 240]]
 
 
-def draw_new_rectangle(quad_coordinates, image_name):
-    # Create a black image
-    img = np.zeros((height, width, 3), np.uint8)
+
+def draw_new_rectangle(quad_coordinates, image_name, img):
+
     # Reshape the coordinates to the required format for polylines
     quad_coordinates = np.array(quad_coordinates, dtype=np.int32).reshape((-1, 1, 2))
 
-    index1 = 0
-    index2 = 1
-    m = quad_coordinates[index1].copy()
 
+    M = cv2.getPerspectiveTransform(np.float32(rectangle_coordinates), np.float32(quad_coordinates))
 
-    # Swap the items
-    quad_coordinates[index1] = quad_coordinates[index2]
-    quad_coordinates[index2] = m
-    ###########print(quad_coordinates)
+    result = cv2.warpPerspective(img, M, (img.shape[1], img.shape[0]))
 
-
-    # Draw the white quadrilateral on the black background
-    color = (255, 255, 255)
-    thickness = -1 # negative thickness fills the quadrilateral
-    is_closed = True
-
-    result = cv2.fillPoly(img, [quad_coordinates], color)
-    
     average_color = filter_by_average_color(result)[0]
 
     if average_color > 42.5:
@@ -49,7 +50,9 @@ def draw_new_rectangle(quad_coordinates, image_name):
         new_image_path = f"datasets/Testset/two_corner_out/{image_name}.png"
     else:
         new_image_path = f"datasets/Testset/nightmare/{image_name}.png"
-    
+
+    new_image_path = f"datasets/Testset/{image_name}.png"
+
     cv2.imwrite(new_image_path, result)
 
     cv2.waitKey(0)
@@ -75,11 +78,6 @@ def distortion_and_translation():
     input_list = random.sample(input_list, 8000)
     return input_list
 
-def generate_image(input_list):
-    rectangle_coordinates = [[120,120], [120, 240], [320, 120], [320, 240]]
-    for input in input_list:
-        result = np.array(distorded_cordinates(input[1], input[0], rectangle_coordinates), np.int32)
-        draw_new_rectangle(result, f"{input[1][0]} {input[1][1]} {input[1][2]}   {input[0][0]} {input[0][1]} {input[0][2]} {100}")
 
 def only_translation():
     x_position = list(range(100, 350, 10))
@@ -128,18 +126,29 @@ def filter_by_average_color(img):
     return avg_color
 
 
-def draw_many_rectangle(input_list):
+def draw_many_rectangle(input_list, img):
     rectangle_coordinates = [[120,120], [120, 240], [320, 120], [320, 240]]
     for input in input_list:
         # Define the coordinates of the quadrilateral
         quad_coordinates = np.array(distorded_cordinates(input[0], input[1], rectangle_coordinates), np.int32)
-        draw_new_rectangle(quad_coordinates, f"{input[0][0]} {input[0][1]} {input[0][2]} {input[1][0]} {input[1][1]} {input[1][2]} {100}")
+        draw_new_rectangle(quad_coordinates, f"{input[0][0]} {input[0][1]} {input[0][2]} {input[1][0]} {input[1][1]} {input[1][2]} {100}", img)
 
-#draw_many_rectangle(only_translation())
-#draw_many_rectangle(only_distortion())
-#draw_many_rectangle(distortion_and_translation())
-#distor
-#draw_many_rectangle(big_distortion())
+
+# Create a black image
+original_img = np.zeros((height, width, 3), np.uint8)
+
+original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 20)
+
+#original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 10)
+
+#original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 5)
+
+
+
+draw_many_rectangle(only_translation(), original_img)
+draw_many_rectangle(only_distortion(), original_img)
+draw_many_rectangle(distortion_and_translation(), original_img)
+draw_many_rectangle(big_distortion(), original_img)
 
 
 

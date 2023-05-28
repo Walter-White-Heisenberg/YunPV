@@ -58,12 +58,22 @@ def subtract(path1, path2):
     diff_color = cv2.add(diff_color_negative, diff_color_positive)
     diff_color = cv2.add(diff_color, diff_color_zero)
 
-    # Display the resulting image
-    cv2.imshow('Difference', diff_color)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
     return diff_color
+
+def calculate_area_accuracy(image, original):
+    
+    original = img1 = cv2.imread(original)
+
+    blue_mask = (image[:, :, 0] == 255)  
+    red_mask = (image[:, :, 2] == 255) 
+    white_mask = (original[:, :, 0] == 255) & (original[:, :, 1] == 255) & (original[:, :, 2] == 255)  # White pixels in the image
+
+
+    blue = np.sum(blue_mask)
+    red = np.sum(red_mask)
+    white = np.sum(white_mask)
+
+    return (blue + red) / white
 '''
 image_info_list = []
 for file_name in os.listdir("datasets/validation_set"):
@@ -90,14 +100,12 @@ for im_inf in image_info_list:
 name_list = ["distortion", "distortion+translation", "one corner out", "translation", "two corner out"]
 image_info_list = []
 for file_name in name_list:
-    result = subtract("datasets/validation_set/" + file_name + ".png", "datasets/validation_set/reverse " + file_name + ".png")
-    cv2.imwrite("datasets/validation_set/subtract" + file_name + ".png", result)
-#path1 = 'C:/Users/Yun Li/Downloads/pvmod-main/pvmod-main/YUn/github/YunPV/mimic camera/datasets/validation_set/'
+    print(file_name)
+    path1 = "datasets/validation_set/originally generated/" + file_name + ".png"
+    path2 = "datasets/validation_set/reverse/" + file_name + ".png"
+    result = subtract(path1, path2)
+    cv2.imwrite("datasets/validation_set/subtraction/" + file_name + str(calculate_area_accuracy(result, path1)) + ".png", result)
 
-
-#path2 = 'C:/Users/Yun Li/Downloads/pvmod-main/pvmod-main/YUn/github/YunPV/mimic camera/datasets/validation_set/pitch_angle = 0.png'
-
-#subtract(path1, path2)
 
 
     
