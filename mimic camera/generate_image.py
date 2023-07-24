@@ -12,14 +12,6 @@ import os
 
 
 
-folder_name_l = ["two_corner_out","one_corner_out","nightmare", "distortion+translation", "big_distortion_big_translation", "only_translation", "only_distortion", "test"]
-def make_folder(dir_name):
-    for i in folder_name_l:
-        if not os.path.exists("datasets/Testset/" + i):
-            print(folder_name_l)
-            os.makedirs("datasets/Testset/" + i)
-
-
 def draw_rectangle_with_grid(image, rectangle_coordinates, grid_size, color=(0, 0, 0), thickness=1):
 
     # Draw the rectangle
@@ -160,7 +152,8 @@ def draw_many_rectangle(input_list, folder_name, case, img):
     for input in input_list:
         # Define the coordinates of the quadrilateral
         quad_coordinates = np.array(distorded_cordinates(input[0], input[1], rectangle_coordinates), np.int32)
-        draw_new_rectangle(quad_coordinates, folder_name, f"/{case}/{input[0][0]} {input[0][1]} {input[0][2]} {input[1][0]} {input[1][1]} {input[1][2]} {100}", img)
+        print(f"{case}/{folder_name}")
+        draw_new_rectangle(quad_coordinates, f"{case}/{folder_name}", f"/{input[0][0]} {input[0][1]} {input[0][2]} {input[1][0]} {input[1][1]} {input[1][2]} {100}", img)
 
 
 def random_color_distribution(original):
@@ -201,26 +194,12 @@ def random_color_distribution(original):
 
     return image_color
 
-for name in folder_name_l:
-    make_folder(name)
 
-original_img = np.zeros((height, width, 3), np.uint8)
-white_rectangle = cv2.fillPoly(original_img.copy(), [np.array(rectangle_coordinates_draw).astype(int)], (255, 255, 255))
-three_five = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 40)
-six_ten = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 20)
-twelve_twenty = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 10)
-the24_40 = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 10)
 
-colored1 = random_color_distribution(six_ten)
-colored2 = random_color_distribution(six_ten)
-colored3 = random_color_distribution(six_ten)
-colored4 = random_color_distribution(six_ten)
-colored5 = random_color_distribution(six_ten)
-cv2.imshow('image window', colored1)
+
 #original_img = cv2.fillPoly(original_img, [np.array([[120,120], [120, 240], [320, 240], [320, 120]]).astype(int)], (255, 255, 255))
 
-original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 20)
-original_img = random_color_distribution(original_img)
+
 
 #original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 10)
 
@@ -236,6 +215,7 @@ only_translation()
 
 
 def generate_dataset(original_img, case):
+    cv2.imshow('image window', original_img)
     input_list, folder_name = only_translation()
     draw_many_rectangle(input_list, folder_name, case, original_img)
     input_list, folder_name = only_distortion()
@@ -245,23 +225,48 @@ def generate_dataset(original_img, case):
     input_list, folder_name = distortion_and_translation()
     draw_many_rectangle(input_list, folder_name, case, original_img)
 
+
+#########################     Select the situation     ############################
+
+#########  following are the list of source image for dataset generation  #########
+original_img = np.zeros((height, width, 3), np.uint8)
+white_rectangle = cv2.fillPoly(original_img.copy(), [np.array(rectangle_coordinates_draw).astype(int)], (255, 255, 255))
+three_five = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 40)
+six_ten = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 20)
+twelve_twenty = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 10)
+the24_40 = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 10)
+
+#6 by 10 grid but with random color distribution (five random generation)
+colored1 = random_color_distribution(six_ten)
+colored2 = random_color_distribution(six_ten)
+colored3 = random_color_distribution(six_ten)
+colored4 = random_color_distribution(six_ten)
+colored5 = random_color_distribution(six_ten)
+
+
+
+original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 20)
+original_img = random_color_distribution(original_img)
+
+#     copy from one of following:   !!!!!
+#    "3 by 5","6 by 10/original", "6 by 10/color distribution/1", "12 by 20", "24 by 40", "original"
+#
+case = '3 by 5'
+
+folder_name_l = ["two_corner_out","one_corner_out","nightmare", "distortion+translation", "big_distortion_big_translation", "only_translation", "only_distortion", "test"]
+for i in folder_name_l:
+    if not os.path.exists("datasets/Testset/"+ case + '/' + i):
+        print(folder_name_l)
+        os.makedirs("datasets/Testset/"+ case + '/' + i)
+
+
+generate_dataset(three_five, case)
 '''
-# "6 by 10/original", "6 by 10/color distribution/1", "12 by 20", "24 by 40", "original"
-case = ''
-generate_dataset(the24_40)
-input_list, folder_name = only_translation()
-draw_many_rectangle(input_list, folder_name, original_img)
-input_list, folder_name = only_distortion()
-draw_many_rectangle(input_list, folder_name, original_img)
-input_list, folder_name = big_distortion()
-draw_many_rectangle(input_list, folder_name, original_img)
-input_list, folder_name = distortion_and_translation()
-draw_many_rectangle(input_list, folder_name, original_img)
+
+
+
+
 '''
-
-
-
-
 '''
 for i in range(0, 180):
     camera_position = (220, 180, 100)
@@ -269,5 +274,4 @@ for i in range(0, 180):
     camera_angle = (2, i, 2)
     results = np.array(distorded_cordinates(camera_position, camera_angle, rectangle_coordinates), np.int32)
     draw_new_rectangle(results, f"0 0 0 pitch_angle = {i}")
-
-    '''
+'''

@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 import csv
 import math
 import pickle
+
 #########initialization of the module##########
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -86,8 +87,8 @@ data selection
 '''
 select_images = {
     "distortion+translation": 0.1, 
-    "only_translation": 0.9,
-    "only_distortion": 0.9,
+    "only_translation": 1,
+    "only_distortion": 1,
     "one_corner_out": 0.1,
     "two_corner_out": 0.1,
     "big_distortion_big_translation": 0.1,
