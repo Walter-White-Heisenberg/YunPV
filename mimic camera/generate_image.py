@@ -234,7 +234,7 @@ white_rectangle = cv2.fillPoly(original_img.copy(), [np.array(rectangle_coordina
 three_five = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 40)
 six_ten = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 20)
 twelve_twenty = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 10)
-the24_40 = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 10)
+the24_40 = draw_rectangle_with_grid(original_img.copy(), rectangle_coordinates_draw, 5)
 
 #6 by 10 grid but with random color distribution (five random generation)
 colored1 = random_color_distribution(six_ten)
@@ -245,8 +245,7 @@ colored5 = random_color_distribution(six_ten)
 
 
 
-original_img = draw_rectangle_with_grid(original_img, [[120,120], [120, 240], [320, 240], [320, 120]], 20)
-original_img = random_color_distribution(original_img)
+
 
 #     copy from one of following:   !!!!!
 #    "3 by 5","6 by 10/original", "6 by 10/color distribution/1", "12 by 20", "24 by 40", "original"
